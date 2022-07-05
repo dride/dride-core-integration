@@ -1,0 +1,57 @@
+#!/bin/sh /etc/rc.common
+# LiveStream service
+# Copyright (C) 2020 Dride, Inc.
+ 
+ 
+start() {    
+        
+        stop()
+
+        echo "Start Live.."   
+        /etc/init.d/rc.record stop
+
+        /usr/bin/rtsp -path /usr/bin/rtsp.conf > /dev/null 2>&1 &
+
+        /usr/sbin/rtsp2webrtc/RTSPtoWeb > /dev/null 2>&1 &
+        /usr/sbin/dride-core led live > /dev/null 2>&1 &
+        echo "live is live ;)"
+
+        # if have lte
+        haveModem=$(lsusb | grep -e "2c7c:0125")
+        if [ $? -ne 0 ]; then
+                echo "LTE not found, no need for proxy of live..."
+        else
+                # start proxy of live
+                serialNumber=$(/usr/sbin/dride-core serial clean)
+                /usr/sbin/dride-core proxy http --region=eu --hostname="$serialNumber.live.dride.cloud" 127.0.0.1:8083 >/dev/null 2>&1 &
+                return 0
+        fi
+        
+
+
+        return 0
+}                 
+ 
+stop() {     
+
+        echo "Stop Live.."         
+        p=$(pidof sample_rtsp)
+        if [ -n "$p" ]; then
+                kill $p
+        fi
+        p=$(pidof RTSPtoWeb)
+        if [ -n "$p" ]; then
+                kill $p
+        fi
+        p=$(pgrep -f "dride-core led live")
+        if [ -n "$p" ]; then
+                kill $p
+        fi
+        p=$(pgrep -f "live.dride.cloud")
+        if [ -n "$p" ]; then
+                kill $p
+        fi
+        
+        return 0
+
+}

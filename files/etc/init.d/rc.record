@@ -1,0 +1,66 @@
+#!/bin/sh
+
+start() {   
+        # stop live stream just to be sure
+        /etc/init.d/rc.liveStream stop 
+
+        # update rec_num on boot to make sure we're targeting one or two cameras
+        if dmesg | grep -i "VIN CCI_1 ERR"; then
+                sed -i 's/rec_num = 2/rec_num = 1/' /usr/bin/recorder.conf
+                /usr/sbin/dride-core db write cams_count 1
+        else
+                /usr/sbin/dride-core db write cams_count 2
+        fi
+
+
+        p=$(pidof recorder)
+        if [ -z "$p" ]; then
+                echo "Start Record.." 
+                nice -n -20 /usr/bin/recorder -path /usr/bin/recorder.conf 2>&1 &
+        fi
+
+
+        echo "record is on"
+        return 0
+}
+ 
+stop() {     
+        echo "Stop Record.."         
+        p=$(pidof recorder)
+        if [ -n "$p" ]; then
+                kill $p
+
+                sleep 2
+
+                p=$(pidof recorder)
+                if [ -n "$p" ]; then
+                        kill -9 $p
+                fi
+        fi
+
+
+
+        echo "record is off"
+        return 0
+}
+
+
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  updateMicSettings)
+        updateMicSettings
+        ;;
+  updateResolution)
+        updateResolution
+        ;;
+  *)
+        echo "Usage: $0 start|stop" >&2
+        exit 3
+        ;;
+esac

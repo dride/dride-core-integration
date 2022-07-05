@@ -1,0 +1,79 @@
+{
+  "videoRecord": {
+    "value": "true",
+    "type": "bool"
+  },
+  "thumbnails": {
+    "value": "true",
+    "type": "bool"
+  },
+  "gps": {
+    "value": "true",
+    "type": "bool"
+  },
+  "parkingMode": {
+    "value": "true",
+    "type": "bool"
+  },
+  "speaker": {
+    "value": "true",
+    "type": "bool"
+  },
+  "mic": {
+    "value": "true",
+    "type": "bool"
+  },
+  "shareHotspot": {
+    "value": "true",
+    "type": "bool"
+  },
+  "smartTrimConcat": {
+    "value": "false",
+    "type": "bool"
+  },
+  "resolution": {
+    "value": "3840p30fps",
+    "type": "select",
+    "options": ["720p60fps", "1080p30fps", "3840p30fps"]
+  },
+  "gSensorSensitivity": {
+    "value": "7",
+    "type": "range",
+    "min": 0,
+    "max": 10
+  },
+  "networkSSID": {
+    "value": "Dride4K",
+    "type": "string"
+  },
+  "networkPassword": {
+    "value": "ilovedride",
+    "type": "string"
+  },
+  "STA_networkSSID": {
+    "value": "DrideFiber2.4",
+    "type": "string"
+  },
+  "STA_networkPassword": {
+    "value": "Ilovedride",
+    "type": "string"
+  },
+  "apn": {
+    "value": "we",
+    "type": "string"
+  },
+  "apnPassword": {
+    "value": "",
+    "type": "string"
+  },
+  "haveLTE": {
+    "value": "false",
+    "type": "bool",
+    "readOnly": true
+  },
+  "isDualCam": {
+    "value": "false",
+    "type": "bool",
+    "readOnly": true
+  }
+}
