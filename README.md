@@ -7,11 +7,11 @@
 Please email us the following config information and we will send you a custom build of dride-core
 
 ```
-const VideoDirMain = "/FULL_PATH_HERE/recordings"
-const VideoDirSub = "/FULL_PATH_HERE/recordings"
-const VideoDirEMR = "/FULL_PATH_HERErecordingsEMR"
-const VideoDirSnapshots = "/FULL_PATH_HERE/snapshots"
-var ConfigPath string = "/FULL_PATH_HERE/config/settings.json"
+VideoDirMain = "/FULL_PATH_HERE/recordings"
+VideoDirSub = "/FULL_PATH_HERE/recordings"
+VideoDirEMR = "/FULL_PATH_HERErecordingsEMR"
+VideoDirSnapshots = "/FULL_PATH_HERE/snapshots"
+ConfigPath string = "/FULL_PATH_HERE/config/settings.json"
 ````
 
 ## Prerequisites
