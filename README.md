@@ -2,11 +2,25 @@
 `dride-core` is a single executable that create the framework to connect to Dride Fleet and App.
 
 
+
+# hwo to get dride-core?
+Please email us the following config information and we will send you a custom build of dride-core
+
+```
+const VideoDirMain = "/FULL_PATH_HERE/recordings"
+const VideoDirSub = "/FULL_PATH_HERE/recordings"
+const VideoDirEMR = "/FULL_PATH_HERErecordingsEMR"
+const VideoDirSnapshots = "/FULL_PATH_HERE/snapshots"
+var ConfigPath string = "/FULL_PATH_HERE/config/settings.json"
+````
+
 ## Prerequisites
 
-* Unit local ip is 192.168.10.1
+* Unit local ip should be 192.168.10.1
 * Make sure this packages are installed on your kernel
   * FFMPEG
+  * sed
+  * hostapd
 * Video record should be placed in the following directory structure 
 
 ```
