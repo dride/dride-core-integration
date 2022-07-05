@@ -25,8 +25,8 @@ ConfigPath string = "/FULL_PATH_HERE/config/settings.json"
 
 ```
 .
-├── dride-core
-├── config
+├── dride-core (place in /usr/sbin/dride-core)
+├── config (place in /usr/sbin/)
 │   └── settings.json
 ├── recordings
 │   ├── 1649970986
@@ -65,7 +65,7 @@ ConfigPath string = "/FULL_PATH_HERE/config/settings.json"
 
 
 # rc.dride 
-This file should run upon boot, It's safe to run thi
+This file should run upon boot.
 
 
 ```console
@@ -88,6 +88,8 @@ dride-core cleaner once
 # Start Dride Core event button listener
 dride-core buttonListener &
 
+# Start Dride Core ws
+/usr/sbin/dride-core ws & /usr/sbin/dride-core monitor $! &
 
 # Ensure emergency video queue is being emptied and transferred to the designated location of emr videos
 # if you dont have cron in your system you can run dride-core as cron service `/usr/sbin/dride-core emrVideoTask` but for performance reasons it's prefered 
@@ -98,6 +100,5 @@ mkdir -p /squashfs/mnt/extsd/snapshots
 # Ensure all videos have a thumbnail, this will run every 60 seconds
 # if you dont have cron in your system you can run dride-core as cron service `/usr/sbin/dride-core ensureThumbs` but for performance reasons it's prefered to use cron.
 (crontab -l 2>/dev/null; echo "* * * * * /usr/sbin/dride-core ensureThumbs once") | crontab -
-
 
 ```
