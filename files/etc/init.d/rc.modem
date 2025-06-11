@@ -1,0 +1,194 @@
+#!/bin/sh
+# Modem service
+# Copyright (C) 2022 Dride, Inc.
+
+SKIP_MODEM="false"
+DEVICE=/dev/cdc-wdm0
+CID_FILE=/tmp/qmi-cid
+
+
+start() {   
+
+  #TODO: start cellular connection to the internet
+    
+}
+
+
+waitUntilWWANisOnline(){
+    counter=0
+    ONLINE=$(ifconfig -a | grep -cs 'wwan0')
+    until [[ $ONLINE -eq 1 ]]; do
+        [[ "$counter" -ge 15 ]] && echo "Failed to start wwan0!" && exit 1
+        echo "waiting for wwan0 interface..." > /dev/console
+        counter=$((counter+1)) 
+        sleep 1
+        if [[ $(ifconfig | grep -cs 'wwan0') -eq 1 ]]; then
+            echo "wwan0 is online" > /dev/console
+            return
+        fi
+    done
+
+}
+
+stop(){
+    #TODO: stop cellular connection to the internet and GPS
+
+    dride-core gps stop
+
+}
+
+resetGPS(){
+    echo "resetting GPS..."
+    dride-core monitor killAllAndRemove "dride-core gps start cellular"
+}
+
+sleepMode(){
+    #TODO: enter sleep mode
+}
+
+rebootModem(){
+   #TODO: reboot modem
+}
+
+installDeps(){
+    #TODO: install dependencies
+}
+
+dfu(){
+    #TODO: DFU modem
+}
+
+syncTime() {
+    chronyc makestep 
+    
+    # Sync from NTP
+    while true; do
+        dride-core syncTime
+        if [ $? -eq 0 ]; then
+            break
+        fi
+    done
+}
+
+initWakeupServer(){
+    dride-core modem setWakeupServer
+}
+
+restart() {
+    stop
+    
+    sleep 4
+
+    start
+}
+
+
+on(){
+    dride-core log "Modem is on, will try to reconnect now..." &
+
+    start
+
+    sleep 10
+    p=$(pgrep -f "dride-core monitorNetworkStatus")
+    if [ -z "$p" ]; then
+        dride-core monitorNetworkStatus & /usr/sbin/dride-core monitor add $! "dride-core monitorNetworkStatus" &
+    fi
+    
+}
+
+refreshConnection(){
+  #TODO: reconnect if needed
+}
+
+off(){
+    #TODO: turn modem off    
+}
+
+installDrivers(){
+    #TODO: install drivers
+}
+
+onOnlyWires(){
+    if [ ! -d /sys/class/gpio/gpio111 ]; then
+        echo 111 > /sys/class/gpio/export
+        echo out > /sys/class/gpio/gpio111/direction
+    fi
+    echo 0 > /sys/class/gpio/gpio111/value
+}
+
+offOnlyWires(){
+    dride-core log "modem offOnlyWires" --error
+    if [ ! -d /sys/class/gpio/gpio111 ]; then
+        echo 111 > /sys/class/gpio/export
+        echo out > /sys/class/gpio/gpio111/direction
+    fi
+    echo 1 > /sys/class/gpio/gpio111/value
+}
+
+startGPS(){    
+    p=$(pgrep -f "dride-core gps start cellular")
+    if [ -z "$p" ]; then
+        dride-core gps start cellular > /dev/console &
+    fi
+}
+
+
+refreshSerial(){    
+ #TODO: restart serial link
+}
+
+
+case "$1" in
+  start)
+        start $2
+        ;;
+  stop)
+        stop
+        ;;
+  restart)
+        restart
+        ;;
+  sleepMode)
+        sleepMode
+        ;;
+  reboot)
+        rebootModem
+        ;;
+  off)
+        off
+        ;;
+  on)
+        on
+        ;;
+  onOnlyWires)
+        onOnlyWires
+        ;;
+  refreshConnection)
+        refreshConnection
+        ;;
+  offOnlyWires)
+        offOnlyWires
+        ;;
+  dfu)
+        dfu
+        ;;
+  refreshSerial)
+        refreshSerial
+        ;;
+  hardReset)
+        offOnlyWires
+        sleep 2
+        dride-core monitor killAllAndRemove "dride-core gps start"
+        onOnlyWires
+
+        # start gps record regardless
+        gpsEnabled=$(dride-core db read gps)
+        if [ "$gpsEnabled" = "true" ]; then
+            startGPS &
+        fi
+        ;;
+  *)
+        echo "Usage: $0 start|stop|restart|sleepMode|on|off|refreshConnection|dfu|refreshSerial|hardReset" >&2
+        exit 3
+        ;;
+esac

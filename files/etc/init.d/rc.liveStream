@@ -1,57 +1,83 @@
-#!/bin/sh /etc/rc.common
-# LiveStream service
-# Copyright (C) 2020 Dride, Inc.
- 
- 
+#!/bin/sh
+# live stream service
+# Copyright (C) 2022 Dride, Inc.
+
 start() {    
-        
-        stop()
+        echo "Start Live.." > /dev/console 
 
-        echo "Start Live.."   
-        /etc/init.d/rc.record stop
+        dride-core db write isLiveBusy true
 
-        /usr/bin/rtsp -path /usr/bin/rtsp.conf > /dev/null 2>&1 &
+         #TODO: run rtsp server
 
-        /usr/sbin/rtsp2webrtc/RTSPtoWeb > /dev/null 2>&1 &
-        /usr/sbin/dride-core led live > /dev/null 2>&1 &
-        echo "live is live ;)"
+        /usr/sbin/dride-core led live &
 
-        # if have lte
-        haveModem=$(lsusb | grep -e "2c7c:0125")
-        if [ $? -ne 0 ]; then
-                echo "LTE not found, no need for proxy of live..."
-        else
-                # start proxy of live
-                serialNumber=$(/usr/sbin/dride-core serial clean)
-                /usr/sbin/dride-core proxy http --region=eu --hostname="$serialNumber.live.dride.cloud" 127.0.0.1:8083 >/dev/null 2>&1 &
-                return 0
-        fi
-        
-
-
-        return 0
+        echo "live is live ;)" > /dev/console
+        dride-core db write isLiveBusy false
+        exit 0
 }                 
  
-stop() {     
 
-        echo "Stop Live.."         
-        p=$(pidof sample_rtsp)
-        if [ -n "$p" ]; then
-                kill $p
-        fi
-        p=$(pidof RTSPtoWeb)
-        if [ -n "$p" ]; then
-                kill $p
-        fi
-        p=$(pgrep -f "dride-core led live")
-        if [ -n "$p" ]; then
-                kill $p
-        fi
-        p=$(pgrep -f "live.dride.cloud")
-        if [ -n "$p" ]; then
-                kill $p
-        fi
-        
-        return 0
+recordStream() {
+       #TODO: record of RTS stream
+}
+
+
+
+stopAfterTimeout() {
+        echo "Will stop Live in 3 minutes.." > /dev/console
+        sleep 180
+
+        # this will also stop the live stream
+        /usr/bin/nohup /etc/init.d/rc.record start &
+
+        exit 0
+}
+
+stop() {
+        dride-core db write isLiveBusy true
+        #TODO: stop rtsp server and turn on recording
+
+        dride-core db write isLiveBusy false
+        exit 0
 
 }
+
+status() {
+        p=$(pgrep -f "sample_rtsp_server")
+        if [ -n "$p" ]; then
+                echo "running"
+                exit 0
+        fi
+        echo "not_running"
+        exit 0
+}
+
+updateTurn() {
+        #TODO: update turn credentials and restart the live stream
+        exit 0
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  stopAfterTimeout)
+        stopAfterTimeout
+        ;;
+  recordStream)
+        recordStream
+        ;;
+  status)
+        status
+        ;;
+  updateTurn)
+        updateTurn
+        ;;
+  *)
+        echo "Usage: $0 start|stop|recordStream|stopAfterTimeout|status|updateTurn" >&2
+        exit 3
+        ;;
+esac
